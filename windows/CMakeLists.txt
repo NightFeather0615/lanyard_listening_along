@@ -4,7 +4,7 @@ project(lanyard_listening_along LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "Lanyard Listening Along")
+set(BINARY_NAME "lanyard_listening_along")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
