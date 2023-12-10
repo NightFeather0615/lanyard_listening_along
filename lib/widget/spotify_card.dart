@@ -237,7 +237,7 @@ class ProgressBar extends StatefulWidget {
 }
 
 class _ProgressBarState extends State<ProgressBar> {
-  late final int _songLength = widget.timestamp.end! - widget.timestamp.start!;
+  late int _songLength = widget.timestamp.end! - widget.timestamp.start!;
   int _songProgress = 0;
   late final Timer _updateTimer;
 
@@ -250,6 +250,7 @@ class _ProgressBarState extends State<ProgressBar> {
       (t) {
         int currentTime = DateTime.now().millisecondsSinceEpoch;
 
+        _songLength = widget.timestamp.end! - widget.timestamp.start!;
         _songProgress = currentTime - widget.timestamp.start!;
 
         if (currentTime >= widget.timestamp.end! || _songProgress >= _songLength) {
@@ -277,6 +278,11 @@ class _ProgressBarState extends State<ProgressBar> {
     return '$minutesString:$secondsString';
   }
 
+  int _safeProgress() {
+    if (_songProgress > _songLength || _songProgress < 0) return 0;
+    return _songProgress;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -296,7 +302,7 @@ class _ProgressBarState extends State<ProgressBar> {
             trackShape: const RoundedRectSliderTrackShape(),
           ),
           child: Slider(
-            value: _songProgress.toDouble(),
+            value: _safeProgress().toDouble(),
             max: _songLength.toDouble(),
             min: 0,
             divisions: _songLength,
