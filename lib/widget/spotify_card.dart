@@ -168,7 +168,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
                     height: 130,
                     width: 130,
@@ -185,9 +185,9 @@ class _SpotifyCardState extends State<SpotifyCard> {
                   child: SizedBox(
                     height: 130,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 14),
+                      padding: const EdgeInsets.only(left: 14, top: 6),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -213,7 +213,6 @@ class _SpotifyCardState extends State<SpotifyCard> {
                               overflow: TextOverflow.ellipsis
                             ),
                           ),
-                          const Spacer(),
                           Expanded(
                             child: ProgressBar(timestamp: spotifyData.timestamps!),
                           )
