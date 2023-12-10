@@ -81,16 +81,19 @@ class _SpotifyCardState extends State<SpotifyCard> {
         stream: Lanyard.subscribe(widget.userId),
         builder: (context, snapshot) {
           if (!snapshot.hasData && !snapshot.hasError) {
+            WindowManager.instance.setTitle("Lanyard Listening Along - Loading...");
             return const Center(child: CircularProgressIndicator(),);
           }
 
           if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
+            WindowManager.instance.setTitle("Lanyard Listening Along - Invalid Discord token");
             return const _ErrorMessage(
               title: "Invalid Discord token"
             );
           }
 
           if (!SpotifyPlayback.instance.isSpotifyConnected) {
+            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to get Spotify connection");
             return _ErrorMessage(
               title: "Unable to get Spotify connection",
               description: const TextSpan(
@@ -103,6 +106,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (!SpotifyPlayback.instance.isDeviceAvailable) {
+            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to get Spotify device");
             return _ErrorMessage(
               title: "Unable to get Spotify device",
               description: const TextSpan(
@@ -115,6 +119,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (snapshot.hasError) {
+            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to fetch user data");
             return _ErrorMessage(
               title: "Unable to fetch user data",
               description: TextSpan(
@@ -142,6 +147,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
             
             if (spotifyData == null) {
               SpotifyPlayback.instance.pause();
+              WindowManager.instance.setTitle("Lanyard Listening Along");
               return const _ErrorMessage(
                 title: "Target user is currently not listening to Spotify"
               );
@@ -153,7 +159,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
                 currentTime - spotifyData.timestamps!.start!
               );
 
-              WindowManager.instance.setTitle("Lanyard Listening Along - ${spotifyData.song}");
+              WindowManager.instance.setTitle("${spotifyData.song} • ${spotifyData.artist}");
             }
 
             return Row(
@@ -220,6 +226,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
             );
           }
 
+          WindowManager.instance.setTitle("Lanyard Listening Along");
           return const Center(child: CircularProgressIndicator(),);
         },
       ),
