@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "lanyard_listening_along" "\0"
+            VALUE "CompanyName", "dev.nightfeather" "\0"
+            VALUE "FileDescription", "Lanyard Listening Along" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "lanyard_listening_along" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "lanyard_listening_along.exe" "\0"
-            VALUE "ProductName", "lanyard_listening_along" "\0"
+            VALUE "InternalName", "Lanyard Listening Along" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 dev.nightfeather. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Lanyard Listening Along.exe" "\0"
+            VALUE "ProductName", "Lanyard Listening Along" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
