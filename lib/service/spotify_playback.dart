@@ -130,12 +130,12 @@ class SpotifyPlayback {
     isDeviceAvailable = _deviceId.isNotEmpty;
   }
 
-  Future<void> play(String trackId, [int position = 0]) async {
+  Future<void> play(String trackId, [int position = 0, bool retry = true]) async {
     Uri uri = Uri.parse(
       "https://api.spotify.com/v1/me/player/play?device_id=$_deviceId"
     );
 
-    await _httpClient.put(
+    Response res = await _httpClient.put(
       uri,
       headers: {
         "Authorization": "Bearer $_spotifyToken"
@@ -147,31 +147,46 @@ class SpotifyPlayback {
         "position_ms": position
       })
     );
+
+    if (res.statusCode == 404 && retry) {
+      await fetchDevice();
+      await play(trackId, position, false);
+    } 
   }
 
-  Future<void> pause() async {
+  Future<void> pause([bool retry = true]) async {
     Uri uri = Uri.parse(
       "https://api.spotify.com/v1/me/player/pause?device_id=$_deviceId"
     );
 
-    await _httpClient.put(
+    Response res = await _httpClient.put(
       uri,
       headers: {
         "Authorization": "Bearer $_spotifyToken"
       }
     );
+
+    if (res.statusCode == 404 && retry) {
+      await fetchDevice();
+      await pause(false);
+    }
   }
 
-  Future<void> repeat([RepeatState state = RepeatState.off]) async {
+  Future<void> repeat([RepeatState state = RepeatState.off, bool retry = true]) async {
     Uri uri = Uri.parse(
       "https://api.spotify.com/v1/me/player/repeat?device_id=$_deviceId&state=${state.state}"
     );
 
-    await _httpClient.put(
+    Response res = await _httpClient.put(
       uri,
       headers: {
         "Authorization": "Bearer $_spotifyToken"
       }
     );
+
+    if (res.statusCode == 404 && retry) {
+      await fetchDevice();
+      await repeat(state, false);
+    }
   }
 }
