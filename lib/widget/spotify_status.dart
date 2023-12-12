@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:landart/landart.dart';
+import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
@@ -72,6 +73,8 @@ class SpotifyCard extends StatefulWidget {
 }
 
 class _SpotifyCardState extends State<SpotifyCard> {
+  SpotifyData? _lastSpotifyData;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -81,19 +84,19 @@ class _SpotifyCardState extends State<SpotifyCard> {
         stream: Lanyard.subscribe(widget.userId),
         builder: (context, snapshot) {
           if (!snapshot.hasData && !snapshot.hasError) {
-            WindowManager.instance.setTitle("Lanyard Listening Along - Loading...");
+            WindowManager.instance.setTitle("${Config.appTitle} - Loading...");
             return const Center(child: CircularProgressIndicator(),);
           }
 
           if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
-            WindowManager.instance.setTitle("Lanyard Listening Along - Invalid Discord token");
+            WindowManager.instance.setTitle("${Config.appTitle} - Invalid Discord token");
             return const _ErrorMessage(
               title: "Invalid Discord token"
             );
           }
 
           if (!SpotifyPlayback.instance.isSpotifyConnected) {
-            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to get Spotify connection");
+            WindowManager.instance.setTitle("${Config.appTitle} - Unable to get Spotify connection");
             return _ErrorMessage(
               title: "Unable to get Spotify connection",
               description: const TextSpan(
@@ -106,7 +109,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (!SpotifyPlayback.instance.isDeviceAvailable) {
-            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to get Spotify device");
+            WindowManager.instance.setTitle("${Config.appTitle} - Unable to get Spotify device");
             return _ErrorMessage(
               title: "Unable to get Spotify device",
               description: const TextSpan(
@@ -119,11 +122,11 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (snapshot.hasError) {
-            WindowManager.instance.setTitle("Lanyard Listening Along - Unable to fetch user data");
+            WindowManager.instance.setTitle("${Config.appTitle} - Unable to fetch user data");
             return _ErrorMessage(
               title: "Unable to fetch user data",
               description: TextSpan(
-                text: "Please make sure your target user has joined the ",
+                text: "Please make sure target user has joined the ",
                 children: [
                   TextSpan(
                     text: 'Lanyard Discord server',
@@ -143,23 +146,37 @@ class _SpotifyCardState extends State<SpotifyCard> {
 
           if (snapshot.hasData) {
             SpotifyData? spotifyData = snapshot.data!.spotify;
-
             
             if (spotifyData == null) {
               SpotifyPlayback.instance.pause();
-              WindowManager.instance.setTitle("Lanyard Listening Along");
+
+              WindowManager.instance.setTitle(Config.appTitle);
+
               return const _ErrorMessage(
                 title: "Target user is currently not listening to Spotify"
               );
             } else {
               int currentTime = DateTime.now().millisecondsSinceEpoch;
 
-              SpotifyPlayback.instance.play(
-                spotifyData.trackId ?? "",
-                currentTime - spotifyData.timestamps!.start!
-              );
+              if (spotifyData.trackId == null) {
+                WindowManager.instance.setTitle("${Config.appTitle} - Unable to get song track ID");
 
-              WindowManager.instance.setTitle("${spotifyData.song} • ${spotifyData.artist}");
+                return _ErrorMessage(
+                  title: "Unable to get song track ID",
+                  onAction: () => setState(() {}),
+                );
+              } else {
+                if (_lastSpotifyData != spotifyData) {
+                  SpotifyPlayback.instance.play(
+                    spotifyData.trackId!,
+                    currentTime - spotifyData.timestamps!.start!
+                  );
+
+                  _lastSpotifyData = spotifyData;
+                }
+
+                WindowManager.instance.setTitle("${spotifyData.song} • ${spotifyData.artist}");
+              }
             }
 
             return Row(
@@ -225,7 +242,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
             );
           }
 
-          WindowManager.instance.setTitle("Lanyard Listening Along");
+          WindowManager.instance.setTitle(Config.appTitle);
           return const Center(child: CircularProgressIndicator(),);
         },
       ),

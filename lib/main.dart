@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:lanyard_listening_along/config.dart';
+import 'package:lanyard_listening_along/page/discord_login.dart';
+import 'package:lanyard_listening_along/page/listening_along.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:lanyard_listening_along/widget/spotify_card.dart';
+import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
 
@@ -13,11 +16,11 @@ void main() async {
   if (Platform.isWindows || Platform.isMacOS) {
     await windowManager.ensureInitialized();
 
-    Size windowSize = const Size(520, 396);
-    await WindowManager.instance.setMinimumSize(windowSize);
-    await WindowManager.instance.setMaximumSize(windowSize);
-    await WindowManager.instance.setSize(windowSize);
-    await WindowManager.instance.setTitle("Lanyard Listening Along");
+    Size initWindowSize = const Size(250, 250);
+    await WindowManager.instance.setTitle("Loading...");
+    await WindowManager.instance.setMinimumSize(initWindowSize);
+    await WindowManager.instance.setMaximumSize(initWindowSize);
+    await WindowManager.instance.setSize(initWindowSize);
   }
 
   runApp(const MainApp());
@@ -29,7 +32,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lanyard Listening Along',
+      title: Config.appTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(0, 43, 45, 49),
@@ -39,130 +42,73 @@ class MainApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      home: const MainPage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<StatefulWidget> createState() => _MainPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final _secureStorage = const FlutterSecureStorage();
-  bool rememberToken = false;
+class _MainPageState extends State<MainPage> {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final SystemTray _systemTray = SystemTray();
+  final Menu _menuSimple = Menu();
+  bool _isAppHide = false;
 
-  final TextEditingController _discordTokenInput = TextEditingController();
-  final TextEditingController _targetUserIdInput = TextEditingController();
+  String _getTrayImagePath(String imageName) {
+    return Platform.isWindows ? 'assets/$imageName.ico' : 'assets/$imageName.png';
+  }
+
+  Future<void> _initSystemTray() async {
+    await _systemTray.initSystemTray(
+      title: Config.appTitle,
+      toolTip: "Listening along on Spotify using Lanyard API",
+      iconPath: _getTrayImagePath('app_icon')
+    );
+
+    _systemTray.registerSystemTrayEventHandler((eventName) async {
+      if (eventName == kSystemTrayEventClick) {
+        await WindowManager.instance.isVisible() ? WindowManager.instance.hide() : WindowManager.instance.show();
+        _isAppHide = !_isAppHide;
+      } else if (eventName == kSystemTrayEventRightClick) {
+        _systemTray.popUpContextMenu();
+      }
+    });
+
+    _systemTray.setContextMenu(_menuSimple);
+  }
 
   @override
   void initState() {
     super.initState();
-    SpotifyPlayback.instance.token(_discordTokenInput.text);
-    _secureStorage.read(key: "discordToken").then((v) {
-      _discordTokenInput.text = v ?? "";
-      SpotifyPlayback.instance.token(_discordTokenInput.text);
-      setState(() {
-        rememberToken = v != null;
-      });
+    _initSystemTray();
+    _secureStorage.read(key: "discordToken").then((token) async {
+      if (token == null) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const DiscordLoginPage())
+          );
+        }
+      } else {
+        await SpotifyPlayback.instance.token(token);
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const ListeningAlongPage())
+          );
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextField(
-              controller: _discordTokenInput,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Discord Token",
-                hintText: "Enter your Discord token",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8)
-                )
-              ),
-              onChanged: (_) {
-                setState(() {
-                  SpotifyPlayback.instance.token(_discordTokenInput.text);
-                });
-              },
-              onSubmitted: (_) async {
-                if (rememberToken) {
-                  await _secureStorage.write(
-                    key: "discordToken",
-                    value: _discordTokenInput.text
-                  );
-                }
-                setState(() {
-                  SpotifyPlayback.instance.token(_discordTokenInput.text);
-                });
-              },
-              onEditingComplete: () async {
-                if (rememberToken) {
-                  await _secureStorage.write(
-                    key: "discordToken",
-                    value: _discordTokenInput.text
-                  );
-                }
-                setState(() {
-                  SpotifyPlayback.instance.token(_discordTokenInput.text);
-                });
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2, bottom: 22),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Checkbox(
-                    value: rememberToken,
-                    onChanged: (value) async {
-                      rememberToken = value ?? false;
-
-                      if (rememberToken) {
-                        await _secureStorage.write(
-                          key: "discordToken",
-                          value: _discordTokenInput.text
-                        );
-                      } else {
-                        await _secureStorage.delete(key: "discordToken");
-                      }
-
-                      setState(() {});
-                    },
-                  ),
-                  const Text(
-                    "Remember token"
-                  )
-                ],
-              ),
-            ),
-            TextField(
-              controller: _targetUserIdInput,
-              decoration: InputDecoration(
-                labelText: "Target User ID",
-                hintText: "Enter the user ID you want listening along",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8)
-                )
-              ),
-              onSubmitted: (_) => setState(() {}),
-              onChanged: (_) => setState(() {}),
-              onEditingComplete: () => setState(() {}),
-            ),
-            const Spacer(),
-            SpotifyCard(userId: _targetUserIdInput.text)
-          ],
-        ),
-      ),
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator(),)
     );
   }
 }

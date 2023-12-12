@@ -41,12 +41,12 @@ class SpotifyPlayback {
     return _instance!;
   }
 
-  void token(String token) {
+  Future<void> token(String token) async {
     _discordToken = token.replaceAll(_tokenRegExp, '');
-    _setupTimer();
+    await _setup();
   }
 
-  void _setupTimer() async {
+  Future<void> _setup() async {
     if (_refreshTimer != null) {
       _refreshTimer!.cancel();
     }
