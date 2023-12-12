@@ -21,6 +21,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   final TextEditingController _targetUserIdInput = TextEditingController();
+  final FocusNode _targetUserIdFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
           children: [
             TextField(
               controller: _targetUserIdInput,
+              focusNode: _targetUserIdFocusNode,
               decoration: InputDecoration(
                 labelText: "Target User ID",
                 hintText: "Enter the user ID you want listening along",
@@ -69,7 +71,10 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
               ),
               onSubmitted: (_) => setState(() {}),
               onEditingComplete: () => setState(() {}),
-              onTapOutside: (_) => setState(() {}),
+              onTapOutside: (_) {
+                _targetUserIdFocusNode.unfocus();
+                setState(() {});
+              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
