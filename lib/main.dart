@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/discord_login.dart';
@@ -87,7 +88,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     _initSystemTray();
-    _secureStorage.read(key: "discordToken").then((token) async {
+    _secureStorage.read(key: Config.discordTokenKey).then((token) async {
       if (token == null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(

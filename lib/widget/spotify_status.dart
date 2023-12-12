@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import 'package:landart/landart.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
@@ -134,7 +135,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
                         await launchUrl(
-                          Uri.parse("https://discord.gg/UrXF2cfJ7F")
+                          Uri.parse(Config.lanyardDiscordServerInvite)
                         );
                       },
                   )

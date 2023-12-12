@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart';
+import 'package:lanyard_listening_along/config.dart';
 
 
 enum RepeatState {
@@ -69,13 +71,13 @@ class SpotifyPlayback {
 
   Future<void> fetchSpotifyToken() async {
     Uri connectionsUri = Uri.parse(
-      "https://discord.com/api/v9/users/@me/connections"
+      "${Config.discordApiUrl}/users/@me/connections"
     );
 
     Response connectionsRes = await _httpClient.get(
       connectionsUri,
       headers: {
-        "Authorization": _discordToken
+        HttpHeaders.authorizationHeader: _discordToken
       }
     );
 
@@ -92,13 +94,13 @@ class SpotifyPlayback {
     if (!isSpotifyConnected) return;
     
     Uri accessTokenUri = Uri.parse(
-      "https://discord.com/api/v9/users/@me/connections/spotify/$spotifyConnectionId/access-token"
+      "${Config.discordApiUrl}/users/@me/connections/spotify/$spotifyConnectionId/access-token"
     );
 
     Response accessTokenRes = await _httpClient.get(
       accessTokenUri,
       headers: {
-        "Authorization": _discordToken
+        HttpHeaders.authorizationHeader: _discordToken
       }
     );
 
@@ -111,34 +113,43 @@ class SpotifyPlayback {
 
   Future<void> fetchDevice() async {
     Uri uri = Uri.parse(
-      "https://api.spotify.com/v1/me/player/devices"
+      "${Config.spotifyApiUrl}/me/player/devices"
     );
 
     Response res = await _httpClient.get(
       uri,
       headers: {
-        "Authorization": "Bearer $_spotifyToken"
+        HttpHeaders.authorizationHeader: "Bearer $_spotifyToken"
       }
     );
 
-    _deviceId = (jsonDecode(res.body)["devices"] ?? [])
-      .firstWhere(
-        (e) => !e["is_restricted"] && e["id"] != null,
-        orElse: () => {"id": ""}
+    List<dynamic> devices = (jsonDecode(res.body)["devices"] ?? [])
+      .where((e) => !e["is_restricted"] && e["id"] != null)
+      .toList();
+    
+    if (devices.isEmpty) {
+      _deviceId = "";
+    } else if (devices.length > 1) {
+      _deviceId = devices.firstWhere(
+        (e) => e["is_active"],
+        orElse: () => devices.first
       )["id"];
+    } else {
+      _deviceId = devices.first["id"];
+    }
 
     isDeviceAvailable = _deviceId.isNotEmpty;
   }
 
   Future<void> play(String trackId, [int position = 0, bool retry = true]) async {
     Uri uri = Uri.parse(
-      "https://api.spotify.com/v1/me/player/play?device_id=$_deviceId"
+      "${Config.spotifyApiUrl}/me/player/play?device_id=$_deviceId"
     );
 
     Response res = await _httpClient.put(
       uri,
       headers: {
-        "Authorization": "Bearer $_spotifyToken"
+        HttpHeaders.authorizationHeader: "Bearer $_spotifyToken"
       },
       body: jsonEncode({
         "uris": [
@@ -156,13 +167,13 @@ class SpotifyPlayback {
 
   Future<void> pause([bool retry = true]) async {
     Uri uri = Uri.parse(
-      "https://api.spotify.com/v1/me/player/pause?device_id=$_deviceId"
+      "${Config.spotifyApiUrl}/me/player/pause?device_id=$_deviceId"
     );
 
     Response res = await _httpClient.put(
       uri,
       headers: {
-        "Authorization": "Bearer $_spotifyToken"
+        HttpHeaders.authorizationHeader: "Bearer $_spotifyToken"
       }
     );
 
@@ -174,13 +185,13 @@ class SpotifyPlayback {
 
   Future<void> repeat([RepeatState state = RepeatState.off, bool retry = true]) async {
     Uri uri = Uri.parse(
-      "https://api.spotify.com/v1/me/player/repeat?device_id=$_deviceId&state=${state.state}"
+      "${Config.spotifyApiUrl}/me/player/repeat?device_id=$_deviceId&state=${state.state}"
     );
 
     Response res = await _httpClient.put(
       uri,
       headers: {
-        "Authorization": "Bearer $_spotifyToken"
+        HttpHeaders.authorizationHeader: "Bearer $_spotifyToken"
       }
     );
 

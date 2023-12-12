@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/listening_along.dart';
@@ -28,7 +29,7 @@ class _DiscordLoginPage extends State<DiscordLoginPage> {
     await _webviewController.clearCache();
     await _webviewController.clearCookies();
 
-    await _webviewController.loadUrl("https://discord.com/login");
+    await _webviewController.loadUrl(Config.discordLoginUrl);
 
     await _webviewController.executeScript("""
 const waitLocalStorageDelete = async () => {
@@ -62,7 +63,7 @@ window.localStorage.clear();
 
     _tokenInterceptSubscription = _webviewController.webMessage.listen((token) async {
       _tokenInterceptSubscription?.cancel();
-      await _secureStorage.write(key: "discordToken", value: token);
+      await _secureStorage.write(key: Config.discordTokenKey, value: token);
       await SpotifyPlayback.instance.token(token);
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -89,7 +90,7 @@ window.localStorage.clear();
 
     _initWebview();
 
-    _secureStorage.read(key: "discordToken").then((v) {
+    _secureStorage.read(key: Config.discordTokenKey).then((v) {
       if (v != null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
