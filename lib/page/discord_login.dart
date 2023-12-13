@@ -25,9 +25,8 @@ class DiscordLoginPage extends StatefulWidget {
 }
 
 class _DiscordLoginPage extends State<DiscordLoginPage> {
-  bool _isWebviewAvailable = false;
+  bool? _isWebView2Available;
   final WebviewController _windowsWebviewController = WebviewController();
-  final GlobalKey webViewKey = GlobalKey();
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   StreamSubscription<dynamic>? _tokenInterceptSubscription;
@@ -70,10 +69,12 @@ const waitLocalStorageDelete = async () => {
   Future<void> _initWindowsWebview() async {
     if (await WebviewController.getWebViewVersion() == null) {
       await Utils.setTitleSafe("WebView2 not installed");
-      _isWebviewAvailable = false;
+      setState(() {
+        _isWebView2Available = false;
+      });
       return;
     } else {
-      _isWebviewAvailable = true;
+      _isWebView2Available = true;
     }
 
     await _windowsWebviewController.initialize();
@@ -103,6 +104,19 @@ const waitLocalStorageDelete = async () => {
     if (mounted) setState(() {});
   }
 
+  Future<void> _initWebView() async {
+    if (Platform.isWindows) {
+      Size loginWindowSize = const Size(860, 620);
+      await WindowManager.instance.setMinimumSize(loginWindowSize);
+      await WindowManager.instance.setMaximumSize(loginWindowSize);
+      await WindowManager.instance.setSize(loginWindowSize);
+    }
+
+    if (Platform.isWindows) {
+      await _initWindowsWebview();
+    }
+  }
+
   Future<void> _setupWebView2() async {
     HttpClient httpClient = HttpClient();
     Directory cacheDir = await getApplicationCacheDirectory();
@@ -119,17 +133,8 @@ const waitLocalStorageDelete = async () => {
   @override
   void initState() {
     super.initState();
-    
-    if (Platform.isWindows) {
-      Size loginWindowSize = const Size(860, 620);
-      WindowManager.instance.setMinimumSize(loginWindowSize);
-      WindowManager.instance.setMaximumSize(loginWindowSize);
-      WindowManager.instance.setSize(loginWindowSize);
-    }
 
-    if (Platform.isWindows) {
-      _initWindowsWebview();
-    }
+    _initWebView();
 
     _secureStorage.read(key: Config.discordTokenKey).then((v) {
       if (v != null) {
@@ -152,7 +157,10 @@ const waitLocalStorageDelete = async () => {
 
   Widget _getWebview() {
     if (Platform.isWindows) {
-      if (_isWebviewAvailable) {
+      if (_isWebView2Available == null) {
+        return const Center(child: CircularProgressIndicator(),);
+      }
+      if (_isWebView2Available!) {
         return Webview(
           _windowsWebviewController
         );
@@ -212,18 +220,7 @@ const waitLocalStorageDelete = async () => {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: _initWindowsWebview(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return _getWebview();
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      )
+      body: _getWebview()
     );
   }
 }
