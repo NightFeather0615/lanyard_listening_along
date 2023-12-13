@@ -21,6 +21,7 @@ class _ProgressBarState extends State<ProgressBar> {
   late int _songLength = widget.timestamp.end! - widget.timestamp.start!;
   int _songProgress = 0;
   late final Timer _updateTimer;
+  static const double _thumbSize = 2.438;
 
 
   @override
@@ -66,61 +67,59 @@ class _ProgressBarState extends State<ProgressBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SliderTheme(
-            data: SliderThemeData(
-              overlayShape: SliderComponentShape.noOverlay,
-              thumbShape: const RoundSliderThumbShape(
-                enabledThumbRadius: 2.438,
-                disabledThumbRadius: 2.438,
-                elevation: 0
-              ),
-              trackHeight: 3,
-              trackShape: const RoundedRectSliderTrackShape(),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SliderTheme(
+          data: SliderThemeData(
+            overlayShape: SliderComponentShape.noOverlay,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: _thumbSize,
+              disabledThumbRadius: _thumbSize,
+              elevation: 0
             ),
-            child: Slider(
-              value: _safeProgress().toDouble(),
-              max: _songLength.toDouble(),
-              min: 0,
-              divisions: _songLength,
-              onChanged: (_) {},
-            ),
+            trackHeight: 3,
+            trackShape: const RoundedRectSliderTrackShape(),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 1, left: 1, top: 1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Text(
-                  _formatDuration(_songProgress),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                  ),
+          child: Slider(
+            value: _safeProgress().toDouble(),
+            max: _songLength.toDouble(),
+            min: 0,
+            divisions: _songLength,
+            onChanged: (_) {},
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: _thumbSize / 2, left: _thumbSize / 2, top: 1),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Text(
+                _formatDuration(_songProgress),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
                 ),
-                Text(
-                  _formatDuration(_songLength),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+              ),
+              Text(
+                _formatDuration(_songLength),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                ),
+              )
+            ],
+          ),
+        )
+      ],
     );
   }
 }
