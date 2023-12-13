@@ -40,6 +40,6 @@ class SystemTrayHandler {
       }
     });
 
-    systemTray.setContextMenu(_menuSimple);
+    await systemTray.setContextMenu(_menuSimple);
   }
 }
