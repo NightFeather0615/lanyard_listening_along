@@ -27,7 +27,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   void initState() {
     super.initState();
     
-    if (Platform.isWindows || Platform.isMacOS) {
+    if (Platform.isWindows) {
       Size listeningAlongWindowSize = const Size(500, 336);
       WindowManager.instance.setMinimumSize(listeningAlongWindowSize);
       WindowManager.instance.setMaximumSize(listeningAlongWindowSize);
@@ -54,62 +54,68 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextField(
-              controller: _targetUserIdInput,
-              focusNode: _targetUserIdFocusNode,
-              decoration: InputDecoration(
-                labelText: "Target User ID",
-                hintText: "Enter the user ID you want listening along",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8)
-                )
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+              TextField(
+                controller: _targetUserIdInput,
+                focusNode: _targetUserIdFocusNode,
+                decoration: InputDecoration(
+                  labelText: "Target User ID",
+                  hintText: "Enter the user ID you want listening along",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8)
+                  )
+                ),
+                onSubmitted: (_) => setState(() {}),
+                onEditingComplete: () => setState(() {}),
+                onTapOutside: (_) {
+                  _targetUserIdFocusNode.unfocus();
+                  setState(() {});
+                },
               ),
-              onSubmitted: (_) => setState(() {}),
-              onEditingComplete: () => setState(() {}),
-              onTapOutside: (_) {
-                _targetUserIdFocusNode.unfocus();
-                setState(() {});
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    await _secureStorage.delete(key: Config.discordTokenKey);
-                    if (mounted) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => const DiscordLoginPage())
-                      );
-                    }
-                  },
-                  child: const Text("Logout"),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await SpotifyPlayback.instance.fetchDevice();
-                    await SpotifyPlayback.instance.fetchSpotifyToken();
-                    if (mounted) setState(() {});
-                  },
-                  child: const Text("Refresh Session"),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await WindowManager.instance.hide();
-                  },
-                  child: const Text("Minimize to Tray"),
-                ),
-              ],
-            ),
-            RepaintBoundary(
-              child: SpotifyCard(userId: _targetUserIdInput.text),
-            )
-          ],
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _secureStorage.delete(key: Config.discordTokenKey);
+                      if (mounted) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => const DiscordLoginPage())
+                        );
+                      }
+                    },
+                    child: const Text("Logout"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await SpotifyPlayback.instance.fetchDevice();
+                      await SpotifyPlayback.instance.fetchSpotifyToken();
+                      if (mounted) setState(() {});
+                    },
+                    child: const Text("Refresh Session"),
+                  ),
+                  if (Platform.isWindows) ElevatedButton(
+                    onPressed: () async {
+                      await WindowManager.instance.hide();
+                    },
+                    child: const Text("Minimize to Tray"),
+                  ),
+                ],
+              ),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
+              RepaintBoundary(
+                child: SpotifyCard(userId: _targetUserIdInput.text),
+              ),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+            ],
+          ),
         ),
       ),
     );

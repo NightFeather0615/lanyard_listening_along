@@ -14,7 +14,7 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows || Platform.isMacOS) {
+  if (Platform.isWindows) {
     await windowManager.ensureInitialized();
 
     Size initWindowSize = const Size(250, 250);
@@ -59,7 +59,6 @@ class _MainPageState extends State<MainPage> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final SystemTray _systemTray = SystemTray();
   final Menu _menuSimple = Menu();
-  bool _isAppHide = false;
 
   String _getTrayImagePath(String imageName) {
     return Platform.isWindows ? 'assets/$imageName.ico' : 'assets/$imageName.png';
@@ -74,10 +73,11 @@ class _MainPageState extends State<MainPage> {
 
     _systemTray.registerSystemTrayEventHandler((eventName) async {
       if (eventName == kSystemTrayEventClick) {
-        await WindowManager.instance.isVisible() ? WindowManager.instance.hide() : WindowManager.instance.show();
-        _isAppHide = !_isAppHide;
-      } else if (eventName == kSystemTrayEventRightClick) {
-        _systemTray.popUpContextMenu();
+        if (await WindowManager.instance.isVisible()) {
+          await WindowManager.instance.hide();
+        } else {
+          await WindowManager.instance.show();
+        }
       }
     });
 
@@ -87,7 +87,9 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _initSystemTray();
+    if (Platform.isWindows) {
+      _initSystemTray();
+    }
     _secureStorage.read(key: Config.discordTokenKey).then((token) async {
       if (token == null) {
         if (mounted) {

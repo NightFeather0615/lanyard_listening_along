@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,18 @@ class SpotifyCard extends StatefulWidget {
 class _SpotifyCardState extends State<SpotifyCard> {
   SpotifyData? _lastSpotifyData;
 
+  Future<void> _safeSetTitle([String? status, bool includeAppTitle = false]) async {
+    if (Platform.isWindows) {
+      if (status == null) {
+        await WindowManager.instance.setTitle(Config.appTitle);
+      } else {
+        await WindowManager.instance.setTitle(
+          "${includeAppTitle ? '${Config.appTitle} - ' : ''}$status"
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -85,19 +98,19 @@ class _SpotifyCardState extends State<SpotifyCard> {
         stream: Lanyard.subscribe(widget.userId),
         builder: (context, snapshot) {
           if (!snapshot.hasData && !snapshot.hasError) {
-            WindowManager.instance.setTitle("${Config.appTitle} - Loading...");
+            _safeSetTitle("Loading...");
             return const Center(child: CircularProgressIndicator(),);
           }
 
           if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
-            WindowManager.instance.setTitle("${Config.appTitle} - Invalid Discord token");
+            _safeSetTitle("Invalid Discord token");
             return const _ErrorMessage(
               title: "Invalid Discord token"
             );
           }
 
           if (!SpotifyPlayback.instance.isSpotifyConnected) {
-            WindowManager.instance.setTitle("${Config.appTitle} - Unable to get Spotify connection");
+            _safeSetTitle("Unable to get Spotify connection");
             return _ErrorMessage(
               title: "Unable to get Spotify connection",
               description: const TextSpan(
@@ -110,7 +123,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (!SpotifyPlayback.instance.isDeviceAvailable) {
-            WindowManager.instance.setTitle("${Config.appTitle} - Unable to get Spotify device");
+            _safeSetTitle("Unable to get Spotify device");
             return _ErrorMessage(
               title: "Unable to get Spotify device",
               description: const TextSpan(
@@ -123,7 +136,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
           }
 
           if (snapshot.hasError) {
-            WindowManager.instance.setTitle("${Config.appTitle} - Unable to fetch user data");
+            _safeSetTitle("Unable to fetch user data");
             return _ErrorMessage(
               title: "Unable to fetch user data",
               description: TextSpan(
@@ -151,7 +164,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
             if (spotifyData == null) {
               SpotifyPlayback.instance.pause();
 
-              WindowManager.instance.setTitle(Config.appTitle);
+              _safeSetTitle();
 
               return const _ErrorMessage(
                 title: "Target user is currently not listening to Spotify"
@@ -160,7 +173,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
               int currentTime = DateTime.now().millisecondsSinceEpoch;
 
               if (spotifyData.trackId == null) {
-                WindowManager.instance.setTitle("${Config.appTitle} - Unable to get song track ID");
+                _safeSetTitle("Unable to get song track ID");
 
                 return _ErrorMessage(
                   title: "Unable to get song track ID",
@@ -176,7 +189,10 @@ class _SpotifyCardState extends State<SpotifyCard> {
                   _lastSpotifyData = spotifyData;
                 }
 
-                WindowManager.instance.setTitle("${spotifyData.song} • ${spotifyData.artist}");
+                _safeSetTitle(
+                  "${spotifyData.song} • ${spotifyData.artist}",
+                  false
+                );
               }
             }
 
@@ -243,7 +259,7 @@ class _SpotifyCardState extends State<SpotifyCard> {
             );
           }
 
-          WindowManager.instance.setTitle(Config.appTitle);
+          _safeSetTitle();
           return const Center(child: CircularProgressIndicator(),);
         },
       ),
