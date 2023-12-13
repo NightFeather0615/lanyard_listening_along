@@ -136,7 +136,7 @@ const waitLocalStorageDelete = async () => {
       } else {
         return const Center(child: Text("webview2 error"),);
       }
-    } else if (Platform.isIOS || Platform.isAndroid) {
+    } else if (Platform.isAndroid) {
       return SafeArea(
         child: in_app_webview.InAppWebView(
           key: webViewKey,

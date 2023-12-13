@@ -60,7 +60,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+              if (Platform.isAndroid) const Spacer(flex: 4,),
               TextField(
                 controller: _targetUserIdInput,
                 focusNode: _targetUserIdFocusNode,
@@ -78,7 +78,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                   setState(() {});
                 },
               ),
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
+              if (Platform.isAndroid) const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -109,11 +109,11 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                   ),
                 ],
               ),
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
+              if (Platform.isAndroid) const Spacer(),
               RepaintBoundary(
                 child: SpotifyCard(userId: _targetUserIdInput.text),
               ),
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+              if (Platform.isAndroid) const Spacer(flex: 4,),
             ],
           ),
         ),
