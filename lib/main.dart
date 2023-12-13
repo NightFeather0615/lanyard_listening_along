@@ -7,7 +7,7 @@ import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/discord_login.dart';
 import 'package:lanyard_listening_along/page/listening_along.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:system_tray/system_tray.dart';
+import 'package:lanyard_listening_along/service/system_tray_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 
@@ -57,39 +57,15 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final SystemTray _systemTray = SystemTray();
-  final Menu _menuSimple = Menu();
-
-  String _getTrayImagePath(String imageName) {
-    return Platform.isWindows ? 'assets/$imageName.ico' : 'assets/$imageName.png';
-  }
-
-  Future<void> _initSystemTray() async {
-    await _systemTray.initSystemTray(
-      title: Config.appTitle,
-      toolTip: "Listening along on Spotify using Lanyard API",
-      iconPath: _getTrayImagePath('app_icon')
-    );
-
-    _systemTray.registerSystemTrayEventHandler((eventName) async {
-      if (eventName == kSystemTrayEventClick) {
-        if (await WindowManager.instance.isVisible()) {
-          await WindowManager.instance.hide();
-        } else {
-          await WindowManager.instance.show();
-        }
-      }
-    });
-
-    _systemTray.setContextMenu(_menuSimple);
-  }
 
   @override
   void initState() {
     super.initState();
+
     if (Platform.isWindows) {
-      _initSystemTray();
+      SystemTrayHandler.instance.initSystemTray();
     }
+
     _secureStorage.read(key: Config.discordTokenKey).then((token) async {
       if (token == null) {
         if (mounted) {
