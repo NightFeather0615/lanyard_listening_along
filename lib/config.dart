@@ -8,4 +8,6 @@ class Config {
   static const String discordTokenKey = "discordToken";
   static const String discordLoginUrl = "https://discord.com/login";
   static const String discordApiUrl = "https://discord.com/api/v9";
+
+  static const String evergreenBootstrapperUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
 }

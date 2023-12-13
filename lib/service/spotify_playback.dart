@@ -123,7 +123,7 @@ class SpotifyPlayback {
       }
     );
 
-    List<dynamic> devices = (jsonDecode(res.body)["devices"] ?? [])
+    List<dynamic> devices = (jsonDecode(res.body)["devices"] as List<dynamic>)
       .where((e) => !e["is_restricted"] && e["id"] != null)
       .toList();
     

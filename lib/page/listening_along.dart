@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/discord_login.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
+import 'package:lanyard_listening_along/utils.dart';
 import 'package:lanyard_listening_along/widget/spotify_status.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -32,7 +33,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
       WindowManager.instance.setMinimumSize(listeningAlongWindowSize);
       WindowManager.instance.setMaximumSize(listeningAlongWindowSize);
       WindowManager.instance.setSize(listeningAlongWindowSize);
-      WindowManager.instance.setTitle(Config.appTitle);
+      Utils.setTitleSafe();
     }
     
     if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
@@ -111,7 +112,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
               ),
               if (Platform.isIOS || Platform.isAndroid) const Spacer(),
               RepaintBoundary(
-                child: SpotifyCard(userId: _targetUserIdInput.text),
+                child: SpotifyStatus(userId: _targetUserIdInput.text),
               ),
               if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
             ],

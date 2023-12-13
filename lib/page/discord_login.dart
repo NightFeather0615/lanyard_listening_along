@@ -1,19 +1,24 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/listening_along.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:webview_windows/webview_windows.dart' as windows_webview;
-import 'package:flutter_inappwebview/flutter_inappwebview.dart' as in_app_webview;
+import 'package:lanyard_listening_along/utils.dart';
+import 'package:lanyard_listening_along/widget/error_message.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:webview_windows/webview_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
 
 class DiscordLoginPage extends StatefulWidget {
-  const DiscordLoginPage({super.key});
+  const DiscordLoginPage({
+    super.key
+  });
 
   @override
   State<StatefulWidget> createState() => _DiscordLoginPage();
@@ -21,8 +26,9 @@ class DiscordLoginPage extends StatefulWidget {
 
 class _DiscordLoginPage extends State<DiscordLoginPage> {
   bool _isWebviewAvailable = false;
-  final windows_webview.WebviewController _windowsWebviewController = windows_webview.WebviewController();
+  final WebviewController _windowsWebviewController = WebviewController();
   final GlobalKey webViewKey = GlobalKey();
+
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   StreamSubscription<dynamic>? _tokenInterceptSubscription;
 
@@ -61,12 +67,13 @@ const waitLocalStorageDelete = async () => {
 })(XMLHttpRequest.prototype.setRequestHeader);
 """;
 
-  void _initWindowsWebview() async {
-    if (await windows_webview.WebviewController.getWebViewVersion() == null) {
-      setState(() {
-        _isWebviewAvailable = false;
-      });
+  Future<void> _initWindowsWebview() async {
+    if (await WebviewController.getWebViewVersion() == null) {
+      await Utils.setTitleSafe("WebView2 not installed");
+      _isWebviewAvailable = false;
       return;
+    } else {
+      _isWebviewAvailable = true;
     }
 
     await _windowsWebviewController.initialize();
@@ -91,7 +98,22 @@ const waitLocalStorageDelete = async () => {
       }
     });
 
+    await Utils.setTitleSafe("Login to Discord");
+
     if (mounted) setState(() {});
+  }
+
+  Future<void> _setupWebView2() async {
+    HttpClient httpClient = HttpClient();
+    Directory cacheDir = await getApplicationCacheDirectory();
+    File setupFile = File("${cacheDir.path}\\MicrosoftEdgeWebview2Setup.exe");
+    HttpClientResponse res = await (
+      await httpClient.getUrl(Uri.parse(Config.evergreenBootstrapperUrl))
+    ).close();
+    await setupFile.writeAsBytes(
+      await consolidateHttpClientResponseBytes(res)
+    );
+    await Process.run(setupFile.path, []);
   }
 
   @override
@@ -103,7 +125,6 @@ const waitLocalStorageDelete = async () => {
       WindowManager.instance.setMinimumSize(loginWindowSize);
       WindowManager.instance.setMaximumSize(loginWindowSize);
       WindowManager.instance.setSize(loginWindowSize);
-      WindowManager.instance.setTitle("${Config.appTitle} - Login to Discord");
     }
 
     if (Platform.isWindows) {
@@ -129,56 +150,80 @@ const waitLocalStorageDelete = async () => {
     }
   }
 
-  Widget? _getWebview() {
+  Widget _getWebview() {
     if (Platform.isWindows) {
       if (_isWebviewAvailable) {
-        return windows_webview.Webview(_windowsWebviewController);
+        return Webview(
+          _windowsWebviewController
+        );
       } else {
-        return const Center(child: Text("webview2 error"),);
-      }
-    } else if (Platform.isIOS || Platform.isAndroid) {
-      return SafeArea(
-        child: in_app_webview.InAppWebView(
-          key: webViewKey,
-          initialOptions: in_app_webview.InAppWebViewGroupOptions(
-            crossPlatform: in_app_webview.InAppWebViewOptions(
-              useShouldInterceptAjaxRequest: true,
-              clearCache: true
-            )
+        return ErrorMessage(
+          title: "WebView2 not installed",
+          description: const TextSpan(
+            text: "Click the button below to set up WebView2, you may need to restart app or system to take effect"
           ),
-          initialUrlRequest: in_app_webview.URLRequest(url: Uri.parse(Config.discordLoginUrl)),
-          onWebViewCreated: (controller) async {
-
-            await controller.clearCache();
-            await controller.evaluateJavascript(source: _getLocalStorageJs);
-            await controller.evaluateJavascript(source: _clearLocalStorageJs);
+          actionName: "Setup",
+          onAction: () async {
+            await _setupWebView2();
           },
-          shouldInterceptAjaxRequest: (controller, ajaxRequest) async {
-            if (ajaxRequest.headers != null) {
-              String? token = ajaxRequest.headers?.getHeaders()["Authorization"];
-              if (token != null) {
-                await _secureStorage.write(key: Config.discordTokenKey, value: token);
-                await SpotifyPlayback.instance.token(token);
-                if (mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const ListeningAlongPage())
-                  );
-                }
-              }
-            }
-            return ajaxRequest;
-          },
-        ),
-      );
+        );
+      }
     }
 
-    return null;
+    // if (Platform.isIOS || Platform.isAndroid) {
+    //   return SafeArea(
+    //     child: in_app_webview.InAppWebView(
+    //       key: webViewKey,
+    //       initialOptions: in_app_webview.InAppWebViewGroupOptions(
+    //         crossPlatform: in_app_webview.InAppWebViewOptions(
+    //           useShouldInterceptAjaxRequest: true,
+    //           clearCache: true
+    //         )
+    //       ),
+    //       initialUrlRequest: in_app_webview.URLRequest(url: Uri.parse(Config.discordLoginUrl)),
+    //       onWebViewCreated: (controller) async {
+
+    //         await controller.clearCache();
+    //         await controller.evaluateJavascript(source: _getLocalStorageJs);
+    //         await controller.evaluateJavascript(source: _clearLocalStorageJs);
+    //       },
+    //       shouldInterceptAjaxRequest: (controller, ajaxRequest) async {
+    //         if (ajaxRequest.headers != null) {
+    //           String? token = ajaxRequest.headers?.getHeaders()["Authorization"];
+    //           if (token != null) {
+    //             await _secureStorage.write(key: Config.discordTokenKey, value: token);
+    //             await SpotifyPlayback.instance.token(token);
+    //             if (mounted) {
+    //               Navigator.of(context).pushReplacement(
+    //                 MaterialPageRoute(builder: (context) => const ListeningAlongPage())
+    //               );
+    //             }
+    //           }
+    //         }
+    //         return ajaxRequest;
+    //       },
+    //     ),
+    //   );
+    // }
+
+    return const ErrorMessage(title: "Platform Unsupported");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getWebview()
+      body: FutureBuilder(
+        future: _initWindowsWebview(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return _getWebview();
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      )
     );
   }
 }
