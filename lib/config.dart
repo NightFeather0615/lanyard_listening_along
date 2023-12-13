@@ -10,4 +10,6 @@ class Config {
   static const String discordApiUrl = "https://discord.com/api/v9";
 
   static const String evergreenBootstrapperUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
+
+  static const double progressBarThumbSize = 2.438;
 }

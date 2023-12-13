@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:landart/landart.dart';
+import 'package:lanyard_listening_along/config.dart';
 
 
 class ProgressBar extends StatefulWidget {
@@ -21,8 +22,6 @@ class _ProgressBarState extends State<ProgressBar> {
   late int _songLength = widget.timestamp.end! - widget.timestamp.start!;
   int _songProgress = 0;
   late final Timer _updateTimer;
-  static const double _thumbSize = 2.438;
-
 
   @override
   void initState() {
@@ -76,8 +75,8 @@ class _ProgressBarState extends State<ProgressBar> {
           data: SliderThemeData(
             overlayShape: SliderComponentShape.noOverlay,
             thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: _thumbSize,
-              disabledThumbRadius: _thumbSize,
+              enabledThumbRadius: Config.progressBarThumbSize,
+              disabledThumbRadius: Config.progressBarThumbSize,
               elevation: 0
             ),
             trackHeight: 3,
@@ -92,7 +91,11 @@ class _ProgressBarState extends State<ProgressBar> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(right: _thumbSize / 2, left: _thumbSize / 2, top: 1),
+          padding: const EdgeInsets.only(
+            right: Config.progressBarThumbSize / 2,
+            left: Config.progressBarThumbSize / 2,
+            top: 1.2
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,

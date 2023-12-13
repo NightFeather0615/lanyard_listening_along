@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:landart/landart.dart';
+import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/widget/progress_bar.dart';
 
 
@@ -43,32 +44,47 @@ class _SpotifyCardState extends State<SpotifyCard> {
             child: SizedBox(
               height: 130,
               child: Padding(
-                padding: const EdgeInsets.only(left: 14, top: 6),
+                padding: const EdgeInsets.only(left: 12, top: 6),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text(
-                      widget.spotifyData.song,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        overflow: TextOverflow.ellipsis
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: Config.progressBarThumbSize / 2
+                      ),
+                      child: Text(
+                        widget.spotifyData.song,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          overflow: TextOverflow.ellipsis
+                        ),
                       ),
                     ),
-                    Text(
-                      "by ${widget.spotifyData.artist}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        overflow: TextOverflow.ellipsis
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: Config.progressBarThumbSize / 2
+                      ),
+                      child: Text(
+                        "by ${widget.spotifyData.artist}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis
+                        ),
                       ),
                     ),
-                    Text(
-                      "on ${widget.spotifyData.album}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        overflow: TextOverflow.ellipsis
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: Config.progressBarThumbSize / 2
+                      ),
+                      child: Text(
+                        "on ${widget.spotifyData.album}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis
+                        ),
                       ),
                     ),
                     Expanded(
