@@ -11,5 +11,8 @@ class Config {
 
   static const String evergreenBootstrapperUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
 
+  static const String githubRepoUrl = "https://github.com/NightFeather0615/lanyard_listening_along";
+  static const String githubApiReleaseUrl = "https://api.github.com/repos/NightFeather0615/lanyard_listening_along/releases/latest";
+
   static const double progressBarThumbSize = 2.438;
 }

@@ -33,9 +33,27 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
       child: StreamBuilder(
         stream: widget.eventStream,
         builder: (context, snapshot) {
-          if (!snapshot.hasData && !snapshot.hasError) {
-            Utils.setTitleSafe("Loading...");
-            return const Center(child: CircularProgressIndicator(),);
+          if ((!snapshot.hasData && !snapshot.hasError) || snapshot.hasError) {
+            Utils.setTitleSafe("Unable to fetch user data");
+            return ErrorMessage(
+              title: "Unable to fetch user data",
+              description: TextSpan(
+                text: "Please make sure target user has joined the ",
+                children: [
+                  TextSpan(
+                    text: 'Lanyard Discord server',
+                    style: const TextStyle(color: Colors.blue),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        await launchUrl(
+                          Uri.parse(Config.lanyardDiscordServerInvite)
+                        );
+                      },
+                  )
+                ]
+              ),
+              onAction: () => setState(() {}),
+            );
           }
 
           if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
@@ -68,29 +86,6 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
               onAction: () => setState(() {
                 SpotifyPlayback.instance.fetchDevice();
               }),
-            );
-          }
-
-          if (snapshot.hasError) {
-            Utils.setTitleSafe("Unable to fetch user data");
-            return ErrorMessage(
-              title: "Unable to fetch user data",
-              description: TextSpan(
-                text: "Please make sure target user has joined the ",
-                children: [
-                  TextSpan(
-                    text: 'Lanyard Discord server',
-                    style: const TextStyle(color: Colors.blue),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () async {
-                        await launchUrl(
-                          Uri.parse(Config.lanyardDiscordServerInvite)
-                        );
-                      },
-                  )
-                ]
-              ),
-              onAction: () => setState(() {}),
             );
           }
 

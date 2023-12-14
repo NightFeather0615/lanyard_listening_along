@@ -125,6 +125,7 @@ const waitLocalStorageDelete = async () => {
     Response res = await httpClient.get(Uri.parse(Config.evergreenBootstrapperUrl));
     await setupFile.writeAsBytes(res.bodyBytes);
     await Process.run(setupFile.path, []);
+    await setupFile.delete();
   }
 
   @override

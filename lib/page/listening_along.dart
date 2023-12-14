@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:landart/landart.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/discord_login.dart';
@@ -22,18 +23,22 @@ class ListeningAlongPage extends StatefulWidget {
 }
 
 class _ListeningAlongPageState extends State<ListeningAlongPage> {
+  final Box _prefs = Hive.box('sharedPrefs');
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  final TextEditingController _targetUserIdInput = TextEditingController();
+  late final TextEditingController _targetUserIdInput;
   final FocusNode _targetUserIdFocusNode = FocusNode();
+  String _lastTargetUserId = "";
 
-  late StreamController<LanyardUser> _userDataStreamController = StreamController<LanyardUser>();
+  late StreamController<LanyardUser> _userDataStreamController = SpotifyPlayback.subscribeUser(
+    _prefs.get("userId", defaultValue: "")
+  );
 
   late OverlayEntry _dimScreenOverlayEntry;
 
   @override
   void initState() {
-    super.initState();
+    _targetUserIdInput = TextEditingController(text: _prefs.get("userId", defaultValue: ""));
 
     _dimScreenOverlayEntry = OverlayEntry(
       builder: (context) {
@@ -73,6 +78,8 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
         }
       });
     }
+
+    super.initState();
   }
 
   @override
@@ -80,6 +87,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
     _dimScreenOverlayEntry.dispose();
     _targetUserIdInput.dispose();
     _targetUserIdFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -143,6 +151,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
               TextField(
                 controller: _targetUserIdInput,
                 focusNode: _targetUserIdFocusNode,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: "Target User ID",
                   hintText: "Enter the user ID you want listening along",
@@ -150,17 +159,29 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                     borderRadius: BorderRadius.circular(8)
                   )
                 ),
-                onSubmitted: (_) => setState(() {
-                  _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
-                }),
-                onEditingComplete: () => setState(() {
-                  _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
-                }),
-                onTapOutside: (_) {
-                  _targetUserIdFocusNode.unfocus();
-                  setState(() {
+                onSubmitted: (_) {
+                  if (_lastTargetUserId != _targetUserIdInput.text) {
+                    _prefs.put("userId", _targetUserIdInput.text);
                     _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
-                  });
+                    _lastTargetUserId = _targetUserIdInput.text;
+                    setState(() {});
+                  }
+                },
+                onEditingComplete: () {
+                  if (_lastTargetUserId != _targetUserIdInput.text) {
+                    _prefs.put("userId", _targetUserIdInput.text);
+                    _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                    _lastTargetUserId = _targetUserIdInput.text;
+                    setState(() {});
+                  }
+                },
+                onTapOutside: (_) {
+                  if (_lastTargetUserId != _targetUserIdInput.text) {
+                    _prefs.put("userId", _targetUserIdInput.text);
+                    _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                    _lastTargetUserId = _targetUserIdInput.text;
+                    setState(() {});
+                  }
                 },
               ),
 
