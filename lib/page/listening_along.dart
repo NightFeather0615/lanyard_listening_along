@@ -1,18 +1,18 @@
-import 'dart:async';
-import 'dart:io';
+import "dart:async";
+import "dart:io";
 
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
-import 'package:landart/landart.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/page/discord_login.dart';
-import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:lanyard_listening_along/utils.dart';
-import 'package:lanyard_listening_along/widget/spotify_status.dart';
-import 'package:wakelock/wakelock.dart';
-import 'package:window_manager/window_manager.dart';
+import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:hive/hive.dart";
+import "package:landart/landart.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/page/discord_login.dart";
+import "package:lanyard_listening_along/service/spotify_playback.dart";
+import "package:lanyard_listening_along/utils.dart";
+import "package:lanyard_listening_along/widget/spotify_status.dart";
+import "package:wakelock/wakelock.dart";
+import "package:window_manager/window_manager.dart";
 
 
 class ListeningAlongPage extends StatefulWidget {
@@ -23,7 +23,7 @@ class ListeningAlongPage extends StatefulWidget {
 }
 
 class _ListeningAlongPageState extends State<ListeningAlongPage> {
-  final Box _prefs = Hive.box('sharedPrefs');
+  final Box _prefs = Hive.box("sharedPrefs");
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   late final TextEditingController _targetUserIdInput;

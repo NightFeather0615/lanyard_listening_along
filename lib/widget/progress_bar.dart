@@ -1,9 +1,9 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
-import 'package:landart/landart.dart';
-import 'package:lanyard_listening_along/config.dart';
+import "package:landart/landart.dart";
+import "package:lanyard_listening_along/config.dart";
 
 
 class ProgressBar extends StatefulWidget {
@@ -54,9 +54,9 @@ class _ProgressBarState extends State<ProgressBar> {
     final minutes = (ms / 1000 / 60).floor();
     final seconds = (ms / 1000 % 60).round();
 
-    final minutesString = '$minutes';
-    final secondsString = '$seconds'.padLeft(2, '0');
-    return '$minutesString:$secondsString';
+    final minutesString = "$minutes";
+    final secondsString = "$seconds".padLeft(2, "0");
+    return "$minutesString:$secondsString";
   }
 
   int _safeProgress() {

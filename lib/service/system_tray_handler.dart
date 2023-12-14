@@ -1,10 +1,10 @@
-import 'dart:io';
+import "dart:io";
 
-import 'package:hive/hive.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:system_tray/system_tray.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:window_manager/window_manager.dart';
+import "package:hive/hive.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:system_tray/system_tray.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:window_manager/window_manager.dart";
 
 
 class SystemTrayHandler {
@@ -13,7 +13,7 @@ class SystemTrayHandler {
   static SystemTrayHandler? _instance;
   late final SystemTray systemTray;
   final Menu contextMenu = Menu();
-  final Box _prefs = Hive.box('sharedPrefs');
+  final Box _prefs = Hive.box("sharedPrefs");
 
   static SystemTrayHandler get instance {
     if (_instance == null) {
@@ -24,14 +24,14 @@ class SystemTrayHandler {
   }
 
   String _getTrayImagePath(String imageName) {
-    return Platform.isWindows ? 'assets/$imageName.ico' : 'assets/$imageName.png';
+    return Platform.isWindows ? "assets/$imageName.ico" : "assets/$imageName.png";
   }
 
   Future<void> initSystemTray() async {
     await systemTray.initSystemTray(
       title: Config.appTitle,
       toolTip: "Listening along on Spotify using Lanyard API",
-      iconPath: _getTrayImagePath('app_icon')
+      iconPath: _getTrayImagePath("app_icon")
     );
 
     systemTray.registerSystemTrayEventHandler((eventName) async {
@@ -48,8 +48,8 @@ class SystemTrayHandler {
 
     await contextMenu.buildFrom([
       MenuItemCheckbox(
-        label: 'Check for updates',
-        name: 'checkUpdate',
+        label: "Check for updates",
+        name: "checkUpdate",
         checked: _prefs.get("checkUpdate", defaultValue: true),
         onClicked: (menuItem) async {
           MenuItemCheckbox? checkUpdateCheckbox = contextMenu.findItemByName<MenuItemCheckbox>("checkUpdate");
@@ -60,7 +60,7 @@ class SystemTrayHandler {
       ),
       MenuSeparator(),
       MenuItemLabel(
-        label: 'GitHub',
+        label: "GitHub",
         onClicked: (menuItem) async {
           if (await canLaunchUrl(Uri.parse(Config.githubRepoUrl))) {
             await launchUrl(Uri.parse(Config.githubRepoUrl));

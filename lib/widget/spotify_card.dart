@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
-import 'package:landart/landart.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/widget/progress_bar.dart';
+import "package:landart/landart.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/widget/progress_bar.dart";
 
 
 class SpotifyCard extends StatefulWidget {

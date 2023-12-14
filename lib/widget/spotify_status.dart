@@ -1,13 +1,13 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import "package:flutter/gestures.dart";
+import "package:flutter/material.dart";
 
-import 'package:landart/landart.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:lanyard_listening_along/utils.dart';
-import 'package:lanyard_listening_along/widget/error_message.dart';
-import 'package:lanyard_listening_along/widget/spotify_card.dart';
-import 'package:url_launcher/url_launcher.dart';
+import "package:landart/landart.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/service/spotify_playback.dart";
+import "package:lanyard_listening_along/utils.dart";
+import "package:lanyard_listening_along/widget/error_message.dart";
+import "package:lanyard_listening_along/widget/spotify_card.dart";
+import "package:url_launcher/url_launcher.dart";
 
 
 class SpotifyStatus extends StatefulWidget {
@@ -41,7 +41,7 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
                 text: "Please make sure target user has joined the ",
                 children: [
                   TextSpan(
-                    text: 'Lanyard Discord server',
+                    text: "Lanyard Discord server",
                     style: const TextStyle(color: Colors.blue),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {

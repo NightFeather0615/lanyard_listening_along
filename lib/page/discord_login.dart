@@ -1,19 +1,19 @@
-import 'dart:async';
-import 'dart:io';
+import "dart:async";
+import "dart:io";
 
-import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import "package:flutter/material.dart";
+import "package:flutter_inappwebview/flutter_inappwebview.dart";
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/page/listening_along.dart';
-import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:lanyard_listening_along/utils.dart';
-import 'package:lanyard_listening_along/widget/error_message.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:webview_windows/webview_windows.dart' as webview2;
-import 'package:window_manager/window_manager.dart';
+import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:http/http.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/page/listening_along.dart";
+import "package:lanyard_listening_along/service/spotify_playback.dart";
+import "package:lanyard_listening_along/utils.dart";
+import "package:lanyard_listening_along/widget/error_message.dart";
+import "package:path_provider/path_provider.dart";
+import "package:webview_windows/webview_windows.dart" as webview2;
+import "package:window_manager/window_manager.dart";
 
 
 class DiscordLoginPage extends StatefulWidget {
@@ -42,11 +42,11 @@ const waitLocalStorageDelete = async () => {
 
 (async function() {
   await waitLocalStorageDelete();
-  const iframe = document.createElement('iframe');
+  const iframe = document.createElement("iframe");
   document.head.append(iframe);
-  const pd = Object.getOwnPropertyDescriptor(iframe.contentWindow, 'localStorage');
+  const pd = Object.getOwnPropertyDescriptor(iframe.contentWindow, "localStorage");
   iframe.remove();
-  Object.defineProperty(window, 'localStorage', pd);
+  Object.defineProperty(window, "localStorage", pd);
 })()
 """;
 

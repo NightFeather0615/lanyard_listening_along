@@ -1,30 +1,30 @@
-import 'dart:convert';
-import 'dart:io';
+import "dart:convert";
+import "dart:io";
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import "package:flutter/foundation.dart";
+import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:http/http.dart';
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/page/discord_login.dart';
-import 'package:lanyard_listening_along/page/listening_along.dart';
-import 'package:lanyard_listening_along/service/spotify_playback.dart';
-import 'package:lanyard_listening_along/service/system_tray_handler.dart';
-import 'package:lanyard_listening_along/utils.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:system_tray/system_tray.dart';
-import 'package:window_manager/window_manager.dart';
+import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:hive_flutter/adapters.dart";
+import "package:http/http.dart";
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/page/discord_login.dart";
+import "package:lanyard_listening_along/page/listening_along.dart";
+import "package:lanyard_listening_along/service/spotify_playback.dart";
+import "package:lanyard_listening_along/service/system_tray_handler.dart";
+import "package:lanyard_listening_along/utils.dart";
+import "package:package_info_plus/package_info_plus.dart";
+import "package:path_provider/path_provider.dart";
+import "package:system_tray/system_tray.dart";
+import "package:window_manager/window_manager.dart";
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
-  await Hive.openBox('sharedPrefs');
+  await Hive.openBox("sharedPrefs");
 
   if (Platform.isIOS) {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -74,7 +74,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final Box _prefs = Hive.box('sharedPrefs');
+  final Box _prefs = Hive.box("sharedPrefs");
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<bool?> _showUpdateFailedDialog() => showDialog(

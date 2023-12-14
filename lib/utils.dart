@@ -1,8 +1,8 @@
-import 'dart:io';
+import "dart:io";
 
-import 'package:lanyard_listening_along/config.dart';
-import 'package:lanyard_listening_along/service/system_tray_handler.dart';
-import 'package:window_manager/window_manager.dart';
+import "package:lanyard_listening_along/config.dart";
+import "package:lanyard_listening_along/service/system_tray_handler.dart";
+import "package:window_manager/window_manager.dart";
 
 
 class Utils {

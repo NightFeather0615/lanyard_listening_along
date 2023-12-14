@@ -1,10 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+import "dart:async";
+import "dart:convert";
+import "dart:io";
 
-import 'package:http/http.dart';
-import 'package:landart/landart.dart';
-import 'package:lanyard_listening_along/config.dart';
+import "package:http/http.dart";
+import "package:landart/landart.dart";
+import "package:lanyard_listening_along/config.dart";
 
 
 enum RepeatState {
@@ -37,7 +37,7 @@ class SpotifyPlayback {
 
   Timer? _refreshTimer;
 
-  static final _tokenRegExp = RegExp(r'[^A-Za-z0-9._-]');
+  static final _tokenRegExp = RegExp(r"[^A-Za-z0-9._-]");
 
   static SpotifyPlayback get instance {
     _instance ??= SpotifyPlayback._();
@@ -45,7 +45,7 @@ class SpotifyPlayback {
   }
 
   Future<void> token(String token) async {
-    _discordToken = token.replaceAll(_tokenRegExp, '');
+    _discordToken = token.replaceAll(_tokenRegExp, "");
     await _setup();
   }
 
