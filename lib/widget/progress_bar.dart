@@ -25,7 +25,6 @@ class _ProgressBarState extends State<ProgressBar> {
 
   @override
   void initState() {
-    super.initState();
     _updateTimer = Timer.periodic(
       const Duration(milliseconds: 500),
       (t) {
@@ -41,12 +40,14 @@ class _ProgressBarState extends State<ProgressBar> {
         setState(() {});
       }
     );
+    
+    super.initState();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _updateTimer.cancel();
+    super.dispose();
   }
 
   String _formatDuration(int ms) {

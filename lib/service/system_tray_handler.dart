@@ -4,6 +4,7 @@ import 'package:lanyard_listening_along/config.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
+
 class SystemTrayHandler {
   SystemTrayHandler._();
 

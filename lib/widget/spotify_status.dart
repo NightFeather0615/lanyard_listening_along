@@ -120,7 +120,9 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
                   _lastSpotifyData = spotifyData;
                 }
 
-                Utils.setTitleSafe("${spotifyData.song} • ${spotifyData.artist}");
+                Utils.setTitleSafe(
+                  "${spotifyData.song} • ${spotifyData.artist}"
+                );
               }
             }
 

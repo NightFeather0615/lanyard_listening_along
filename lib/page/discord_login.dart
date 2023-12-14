@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/listening_along.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
@@ -119,22 +119,16 @@ const waitLocalStorageDelete = async () => {
   }
 
   Future<void> _setupWebView2() async {
-    HttpClient httpClient = HttpClient();
+    Client httpClient = Client();
     Directory cacheDir = await getApplicationCacheDirectory();
     File setupFile = File("${cacheDir.path}\\MicrosoftEdgeWebview2Setup.exe");
-    HttpClientResponse res = await (
-      await httpClient.getUrl(Uri.parse(Config.evergreenBootstrapperUrl))
-    ).close();
-    await setupFile.writeAsBytes(
-      await consolidateHttpClientResponseBytes(res)
-    );
+    Response res = await httpClient.get(Uri.parse(Config.evergreenBootstrapperUrl));
+    await setupFile.writeAsBytes(res.bodyBytes);
     await Process.run(setupFile.path, []);
   }
 
   @override
   void initState() {
-    super.initState();
-
     _initWebView();
 
     _secureStorage.read(key: Config.discordTokenKey).then((v) {
@@ -146,14 +140,17 @@ const waitLocalStorageDelete = async () => {
         }
       }
     });
+
+    super.initState();
   }
 
   @override
   void dispose() {
-    super.dispose();
     if (Platform.isWindows) {
       _windowsWebviewController.dispose();
     }
+    _tokenInterceptSubscription?.cancel();
+    super.dispose();
   }
 
   Widget _getWebview() {
@@ -200,7 +197,7 @@ const waitLocalStorageDelete = async () => {
               if (token != null) {
                 await _secureStorage.write(key: Config.discordTokenKey, value: token);
                 await SpotifyPlayback.instance.token(token);
-                
+
                 if (mounted) {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => const ListeningAlongPage())
@@ -208,6 +205,7 @@ const waitLocalStorageDelete = async () => {
                 }
               }
             }
+
             return ajaxRequest;
           },
         ),

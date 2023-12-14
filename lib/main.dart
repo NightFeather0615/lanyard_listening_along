@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
@@ -13,9 +13,11 @@ import 'package:window_manager/window_manager.dart';
 
 
 void main() async {
-  debugRepaintRainbowEnabled = true;
-  debugRepaintTextRainbowEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isIOS) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
 
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
@@ -63,8 +65,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
-    super.initState();
-
     if (Platform.isWindows) {
       SystemTrayHandler.instance.initSystemTray();
     }
@@ -85,6 +85,8 @@ class _MainPageState extends State<MainPage> {
         }
       }
     });
+
+    super.initState();
   }
 
   @override

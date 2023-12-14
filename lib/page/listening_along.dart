@@ -10,6 +10,7 @@ import 'package:lanyard_listening_along/page/discord_login.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
 import 'package:lanyard_listening_along/utils.dart';
 import 'package:lanyard_listening_along/widget/spotify_status.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:window_manager/window_manager.dart';
 
 
@@ -26,13 +27,29 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   final TextEditingController _targetUserIdInput = TextEditingController();
   final FocusNode _targetUserIdFocusNode = FocusNode();
 
-  late StreamController<LanyardUser> _streamController;
+  late StreamController<LanyardUser> _userDataStreamController = StreamController<LanyardUser>();
+
+  late OverlayEntry _dimScreenOverlayEntry;
 
   @override
   void initState() {
     super.initState();
 
-    _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+    _dimScreenOverlayEntry = OverlayEntry(
+      builder: (context) {
+        return Material(
+          child: InkWell(
+            onTap: () async {
+              _dimScreenOverlayEntry.remove();
+              await Wakelock.disable();
+            },
+            child: Container(
+              color: Colors.black,
+            ),
+          ),
+        );
+      },
+    );
     
     if (Platform.isWindows) {
       Size listeningAlongWindowSize = const Size(500, 336);
@@ -59,6 +76,60 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   }
 
   @override
+  void dispose() {
+    _dimScreenOverlayEntry.dispose();
+    _targetUserIdInput.dispose();
+    _targetUserIdFocusNode.dispose();
+    super.dispose();
+  }
+
+  List<Widget> _contolButtonList() => [
+    ElevatedButton(
+      onPressed: () async {
+        await _secureStorage.delete(key: Config.discordTokenKey);
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const DiscordLoginPage())
+          );
+        }
+      },
+      child: const Text("Logout"),
+    ),
+    ElevatedButton(
+      onPressed: () async {
+        await SpotifyPlayback.instance.fetchDevice();
+        await SpotifyPlayback.instance.fetchSpotifyToken();
+
+        LanyardUser userData = (
+          await Lanyard.fetchUser(_targetUserIdInput.text)
+        );
+
+        _userDataStreamController.sink.add(userData);
+
+        if (userData.spotify != null) {
+          SpotifyPlayback.instance.play(userData.spotify!);
+        } else {
+          SpotifyPlayback.instance.pause();
+        }
+      },
+      child: const Text("Refresh Session"),
+    ),
+    if (Platform.isWindows) ElevatedButton(
+      onPressed: () async {
+        await WindowManager.instance.hide();
+      },
+      child: const Text("Minimize to Tray"),
+    ),
+    if (Platform.isIOS) ElevatedButton(
+      onPressed: () async {
+        Overlay.of(context).insert(_dimScreenOverlayEntry);
+        await Wakelock.enable();
+      },
+      child: const Text("Dim Screen"),
+    )
+  ];
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -67,7 +138,8 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 6,),
+
               TextField(
                 controller: _targetUserIdInput,
                 focusNode: _targetUserIdFocusNode,
@@ -79,67 +151,39 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                   )
                 ),
                 onSubmitted: (_) => setState(() {
-                  _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                  _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
                 }),
                 onEditingComplete: () => setState(() {
-                  _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                  _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
                 }),
                 onTapOutside: (_) {
                   _targetUserIdFocusNode.unfocus();
                   setState(() {
-                    _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                    _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
                   });
                 },
               ),
+
               if (Platform.isIOS || Platform.isAndroid) const Spacer(),
-              Row(
+
+              if (Platform.isWindows) Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _secureStorage.delete(key: Config.discordTokenKey);
-                      if (mounted) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const DiscordLoginPage())
-                        );
-                      }
-                    },
-                    child: const Text("Logout"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await SpotifyPlayback.instance.fetchDevice();
-                      await SpotifyPlayback.instance.fetchSpotifyToken();
-
-                      LanyardUser userData = (
-                        await Lanyard.fetchUser(_targetUserIdInput.text)
-                      );
-
-                      _streamController.sink.add(userData);
-
-                      if (userData.spotify != null) {
-                        SpotifyPlayback.instance.play(userData.spotify!);
-                      } else {
-                        SpotifyPlayback.instance.pause();
-                      }
-                    },
-                    child: const Text("Refresh Session"),
-                  ),
-                  if (Platform.isWindows) ElevatedButton(
-                    onPressed: () async {
-                      await WindowManager.instance.hide();
-                    },
-                    child: const Text("Minimize to Tray"),
-                  ),
-                ],
+                children: _contolButtonList(),
               ),
+              if (Platform.isIOS || Platform.isAndroid) Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: _contolButtonList(),
+              ),
+
               if (Platform.isIOS || Platform.isAndroid) const Spacer(),
+
               RepaintBoundary(
                 child: SpotifyStatus(
-                  eventStream: _streamController.stream,
+                  eventStream: _userDataStreamController.stream,
                 ),
               ),
-              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
+
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 6,),
             ],
           ),
         ),
