@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Lanyard Listening Along"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppPublisher "NightFeather"
 #define MyAppURL "https://nightfeather.dev"
 #define MyAppExeName "lanyard_listening_along.exe"

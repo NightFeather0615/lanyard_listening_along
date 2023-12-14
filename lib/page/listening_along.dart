@@ -179,6 +179,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                     _prefs.put("userId", _targetUserIdInput.text);
                     _userDataStreamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
                     _lastTargetUserId = _targetUserIdInput.text;
+                    _targetUserIdFocusNode.unfocus();
                     setState(() {});
                   }
                 },

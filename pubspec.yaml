@@ -2,7 +2,7 @@ name: lanyard_listening_along
 description: "Listening along on Spotify using Lanyard API"
 publish_to: "none"
 
-version: 1.1.0
+version: 1.1.1
 
 environment:
   sdk: ">=3.2.2 <4.0.0"

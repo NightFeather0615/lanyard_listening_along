@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Fix `Target User ID` won't unfocus
+
 ## 1.1.0
 
 - Implement update checking for Windows
