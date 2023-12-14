@@ -199,7 +199,7 @@ class _MainPageState extends State<MainPage> {
       }
     }
 
-    String? token = await _secureStorage.read(key: Config.discordTokenKey);
+    String? token = await _secureStorage.read(key: "discordToken");
 
     if (token == null) {
       if (mounted) {

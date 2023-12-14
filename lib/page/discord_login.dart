@@ -91,7 +91,7 @@ const waitLocalStorageDelete = async () => {
 
     _tokenInterceptSubscription = _windowsWebviewController.webMessage.listen((token) async {
       _tokenInterceptSubscription?.cancel();
-      await _secureStorage.write(key: Config.discordTokenKey, value: token);
+      await _secureStorage.write(key: "discordToken", value: token);
       await SpotifyPlayback.instance.token(token);
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -132,7 +132,7 @@ const waitLocalStorageDelete = async () => {
   void initState() {
     _initWebView();
 
-    _secureStorage.read(key: Config.discordTokenKey).then((v) {
+    _secureStorage.read(key: "discordToken").then((v) {
       if (v != null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
@@ -196,7 +196,7 @@ const waitLocalStorageDelete = async () => {
               String? token = ajaxRequest.headers?.getHeaders()["Authorization"];
 
               if (token != null) {
-                await _secureStorage.write(key: Config.discordTokenKey, value: token);
+                await _secureStorage.write(key: "discordToken", value: token);
                 await SpotifyPlayback.instance.token(token);
 
                 if (mounted) {

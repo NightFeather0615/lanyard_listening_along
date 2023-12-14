@@ -6,7 +6,6 @@ import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:hive/hive.dart";
 import "package:landart/landart.dart";
-import "package:lanyard_listening_along/config.dart";
 import "package:lanyard_listening_along/page/discord_login.dart";
 import "package:lanyard_listening_along/service/spotify_playback.dart";
 import "package:lanyard_listening_along/utils.dart";
@@ -65,7 +64,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
     }
     
     if (!SpotifyPlayback.instance.isDiscordTokenVaild) {
-      _secureStorage.read(key: Config.discordTokenKey).then((token) async {
+      _secureStorage.read(key: "discordToken").then((token) async {
         if (token == null) {
           if (mounted) {
             Navigator.of(context).pushReplacement(
@@ -94,7 +93,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   List<Widget> _contolButtonList() => [
     ElevatedButton(
       onPressed: () async {
-        await _secureStorage.delete(key: Config.discordTokenKey);
+        await _secureStorage.delete(key: "discordToken");
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const DiscordLoginPage())
