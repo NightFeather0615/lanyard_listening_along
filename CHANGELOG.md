@@ -1,6 +1,6 @@
 ## 1.1.1
 
-- Fix `Target User ID` won't unfocus
+- Fix text field `Target User ID` won't unfocus
 
 ## 1.1.0
 
