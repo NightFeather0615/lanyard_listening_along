@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
@@ -12,6 +13,8 @@ import 'package:window_manager/window_manager.dart';
 
 
 void main() async {
+  debugRepaintRainbowEnabled = true;
+  debugRepaintTextRainbowEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows) {

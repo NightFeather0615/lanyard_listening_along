@@ -13,10 +13,10 @@ import 'package:url_launcher/url_launcher.dart';
 class SpotifyStatus extends StatefulWidget {
   const SpotifyStatus({
     super.key,
-    required this.userId
+    required this.eventStream
   });
 
-  final String userId;
+  final Stream<LanyardUser> eventStream;
 
   @override
   State<StatefulWidget> createState() => _SpotifyStatusState();
@@ -31,7 +31,7 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
       width: double.infinity,
       height: 130,
       child: StreamBuilder(
-        stream: Lanyard.subscribe(widget.userId),
+        stream: widget.eventStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData && !snapshot.hasError) {
             Utils.setTitleSafe("Loading...");
@@ -106,8 +106,6 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
                 title: "Target user is currently not listening to Spotify"
               );
             } else {
-              int currentTime = DateTime.now().millisecondsSinceEpoch;
-
               if (spotifyData.trackId == null) {
                 Utils.setTitleSafe("Unable to get song track ID");
 
@@ -117,10 +115,7 @@ class _SpotifyStatusState extends State<SpotifyStatus> {
                 );
               } else {
                 if (_lastSpotifyData != spotifyData) {
-                  SpotifyPlayback.instance.play(
-                    spotifyData.trackId!,
-                    currentTime - spotifyData.timestamps!.start!
-                  );
+                  SpotifyPlayback.instance.play(spotifyData);
 
                   _lastSpotifyData = spotifyData;
                 }

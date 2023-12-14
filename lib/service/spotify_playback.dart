@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart';
+import 'package:landart/landart.dart';
 import 'package:lanyard_listening_along/config.dart';
 
 
@@ -46,6 +47,15 @@ class SpotifyPlayback {
   Future<void> token(String token) async {
     _discordToken = token.replaceAll(_tokenRegExp, '');
     await _setup();
+  }
+
+  static StreamController<LanyardUser> subscribeUser(userId) {
+    StreamController<LanyardUser> controller = StreamController();
+    Lanyard.subscribe(userId).listen(
+      controller.sink.add,
+      onError: controller.sink.addError,
+    );
+    return controller;
   }
 
   Future<void> _setup() async {
@@ -141,10 +151,12 @@ class SpotifyPlayback {
     isDeviceAvailable = _deviceId.isNotEmpty;
   }
 
-  Future<void> play(String trackId, [int position = 0, bool retry = true]) async {
+  Future<void> play(SpotifyData spotifyData, {bool calcPosition = true, bool retry = true}) async {
     Uri uri = Uri.parse(
       "${Config.spotifyApiUrl}/me/player/play?device_id=$_deviceId"
     );
+
+    int currentTime = DateTime.now().millisecondsSinceEpoch;
 
     Response res = await _httpClient.put(
       uri,
@@ -153,15 +165,15 @@ class SpotifyPlayback {
       },
       body: jsonEncode({
         "uris": [
-          "spotify:track:$trackId"
+          "spotify:track:${spotifyData.trackId}"
         ],
-        "position_ms": position
+        "position_ms": calcPosition ? currentTime - spotifyData.timestamps!.start! : 0
       })
     );
 
     if (res.statusCode == 404 && retry) {
       await fetchDevice();
-      await play(trackId, position, false);
+      await play(spotifyData, retry: false);
     } 
   }
 

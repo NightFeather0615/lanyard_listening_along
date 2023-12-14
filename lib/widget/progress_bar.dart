@@ -50,8 +50,7 @@ class _ProgressBarState extends State<ProgressBar> {
   }
 
   String _formatDuration(int ms) {
-    final duration = Duration(milliseconds: ms);
-    final minutes = duration.inMinutes;
+    final minutes = (ms / 1000 / 60).floor();
     final seconds = (ms / 1000 % 60).round();
 
     final minutesString = '$minutes';

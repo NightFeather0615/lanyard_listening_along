@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lanyard_listening_along/config.dart';
@@ -11,7 +12,7 @@ import 'package:lanyard_listening_along/service/spotify_playback.dart';
 import 'package:lanyard_listening_along/utils.dart';
 import 'package:lanyard_listening_along/widget/error_message.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:webview_windows/webview_windows.dart';
+import 'package:webview_windows/webview_windows.dart' as webview2;
 import 'package:window_manager/window_manager.dart';
 
 
@@ -26,7 +27,7 @@ class DiscordLoginPage extends StatefulWidget {
 
 class _DiscordLoginPage extends State<DiscordLoginPage> {
   bool? _isWebView2Available;
-  final WebviewController _windowsWebviewController = WebviewController();
+  final webview2.WebviewController _windowsWebviewController = webview2.WebviewController();
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   StreamSubscription<dynamic>? _tokenInterceptSubscription;
@@ -67,7 +68,7 @@ const waitLocalStorageDelete = async () => {
 """;
 
   Future<void> _initWindowsWebview() async {
-    if (await WebviewController.getWebViewVersion() == null) {
+    if (await webview2.WebviewController.getWebViewVersion() == null) {
       await Utils.setTitleSafe("WebView2 not installed");
       setState(() {
         _isWebView2Available = false;
@@ -161,7 +162,7 @@ const waitLocalStorageDelete = async () => {
         return const Center(child: CircularProgressIndicator(),);
       }
       if (_isWebView2Available!) {
-        return Webview(
+        return webview2.Webview(
           _windowsWebviewController
         );
       } else {
@@ -176,43 +177,42 @@ const waitLocalStorageDelete = async () => {
           },
         );
       }
+    } else if (Platform.isIOS || Platform.isAndroid) {
+      return SafeArea(
+        child: InAppWebView(
+          initialOptions: InAppWebViewGroupOptions(
+            crossPlatform: InAppWebViewOptions(
+              useShouldInterceptAjaxRequest: true,
+              clearCache: true
+            )
+          ),
+          initialUrlRequest: URLRequest(url: Uri.parse(Config.discordLoginUrl)),
+          onWebViewCreated: (controller) async {
+
+            await controller.clearCache();
+            await controller.evaluateJavascript(source: _getLocalStorageJs);
+            await controller.evaluateJavascript(source: _clearLocalStorageJs);
+          },
+          shouldInterceptAjaxRequest: (controller, ajaxRequest) async {
+            if (ajaxRequest.headers != null) {
+              String? token = ajaxRequest.headers?.getHeaders()["Authorization"];
+
+              if (token != null) {
+                await _secureStorage.write(key: Config.discordTokenKey, value: token);
+                await SpotifyPlayback.instance.token(token);
+                
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const ListeningAlongPage())
+                  );
+                }
+              }
+            }
+            return ajaxRequest;
+          },
+        ),
+      );
     }
-
-    // if (Platform.isIOS || Platform.isAndroid) {
-    //   return SafeArea(
-    //     child: in_app_webview.InAppWebView(
-    //       key: webViewKey,
-    //       initialOptions: in_app_webview.InAppWebViewGroupOptions(
-    //         crossPlatform: in_app_webview.InAppWebViewOptions(
-    //           useShouldInterceptAjaxRequest: true,
-    //           clearCache: true
-    //         )
-    //       ),
-    //       initialUrlRequest: in_app_webview.URLRequest(url: Uri.parse(Config.discordLoginUrl)),
-    //       onWebViewCreated: (controller) async {
-
-    //         await controller.clearCache();
-    //         await controller.evaluateJavascript(source: _getLocalStorageJs);
-    //         await controller.evaluateJavascript(source: _clearLocalStorageJs);
-    //       },
-    //       shouldInterceptAjaxRequest: (controller, ajaxRequest) async {
-    //         if (ajaxRequest.headers != null) {
-    //           String? token = ajaxRequest.headers?.getHeaders()["Authorization"];
-    //           if (token != null) {
-    //             await _secureStorage.write(key: Config.discordTokenKey, value: token);
-    //             await SpotifyPlayback.instance.token(token);
-    //             if (mounted) {
-    //               Navigator.of(context).pushReplacement(
-    //                 MaterialPageRoute(builder: (context) => const ListeningAlongPage())
-    //               );
-    //             }
-    //           }
-    //         }
-    //         return ajaxRequest;
-    //       },
-    //     ),
-    //   );
-    // }
 
     return const ErrorMessage(title: "Platform Unsupported");
   }

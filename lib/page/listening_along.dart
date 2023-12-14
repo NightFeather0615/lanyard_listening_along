@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:landart/landart.dart';
 import 'package:lanyard_listening_along/config.dart';
 import 'package:lanyard_listening_along/page/discord_login.dart';
 import 'package:lanyard_listening_along/service/spotify_playback.dart';
@@ -24,9 +26,13 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
   final TextEditingController _targetUserIdInput = TextEditingController();
   final FocusNode _targetUserIdFocusNode = FocusNode();
 
+  late StreamController<LanyardUser> _streamController;
+
   @override
   void initState() {
     super.initState();
+
+    _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
     
     if (Platform.isWindows) {
       Size listeningAlongWindowSize = const Size(500, 336);
@@ -61,7 +67,7 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (Platform.isAndroid) const Spacer(flex: 4,),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
               TextField(
                 controller: _targetUserIdInput,
                 focusNode: _targetUserIdFocusNode,
@@ -72,14 +78,20 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                     borderRadius: BorderRadius.circular(8)
                   )
                 ),
-                onSubmitted: (_) => setState(() {}),
-                onEditingComplete: () => setState(() {}),
+                onSubmitted: (_) => setState(() {
+                  _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                }),
+                onEditingComplete: () => setState(() {
+                  _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                }),
                 onTapOutside: (_) {
                   _targetUserIdFocusNode.unfocus();
-                  setState(() {});
+                  setState(() {
+                    _streamController = SpotifyPlayback.subscribeUser(_targetUserIdInput.text);
+                  });
                 },
               ),
-              if (Platform.isAndroid) const Spacer(),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -98,7 +110,18 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                     onPressed: () async {
                       await SpotifyPlayback.instance.fetchDevice();
                       await SpotifyPlayback.instance.fetchSpotifyToken();
-                      if (mounted) setState(() {});
+
+                      LanyardUser userData = (
+                        await Lanyard.fetchUser(_targetUserIdInput.text)
+                      );
+
+                      _streamController.sink.add(userData);
+
+                      if (userData.spotify != null) {
+                        SpotifyPlayback.instance.play(userData.spotify!);
+                      } else {
+                        SpotifyPlayback.instance.pause();
+                      }
                     },
                     child: const Text("Refresh Session"),
                   ),
@@ -110,11 +133,13 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
                   ),
                 ],
               ),
-              if (Platform.isAndroid) const Spacer(),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(),
               RepaintBoundary(
-                child: SpotifyStatus(userId: _targetUserIdInput.text),
+                child: SpotifyStatus(
+                  eventStream: _streamController.stream,
+                ),
               ),
-              if (Platform.isAndroid) const Spacer(flex: 4,),
+              if (Platform.isIOS || Platform.isAndroid) const Spacer(flex: 4,),
             ],
           ),
         ),
