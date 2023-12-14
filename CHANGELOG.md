@@ -1,6 +1,6 @@
 ## 1.1.0
 
-- Implement update checking
+- Implement update checking for Windows
 - Supports IOS
 
 ## 1.0.2
