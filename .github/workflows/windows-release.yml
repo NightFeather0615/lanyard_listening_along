@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - run: flutter config --enable-windows-desktop
+      - name: Flutter Config
+        run: flutter config --no-animations --enable-windows-desktop
       
       - name: Build
         run: flutter build windows --release
