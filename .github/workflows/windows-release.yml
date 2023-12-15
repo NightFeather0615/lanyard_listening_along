@@ -15,7 +15,7 @@ jobs:
       - run: flutter config --enable-windows-desktop
       
       - name: Build
-        run: flutter build windows
+        run: flutter build windows --release
 
       - name: Inno Setup
         run: ISCC ./windows/installer/x64_setup.iss
