@@ -1,0 +1,27 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - run: flutter config --enable-windows-desktop
+      
+      - name: Build
+        run: flutter build windows
+
+      - name: Inno Setup
+        run: ISCC ./windows/installer/x64_setup.iss
+    
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: github.ref_type == 'tag'
+        with:
+          files: ./windows/installer/Lanyard-Listening-Along-Setup.exe 
