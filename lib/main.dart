@@ -26,7 +26,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox("sharedPrefs");
 
-  if (Platform.isIOS) {
+  if (Platform.isIOS || Platform.isAndroid) {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   }
 

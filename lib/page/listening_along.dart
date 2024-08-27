@@ -133,6 +133,13 @@ class _ListeningAlongPageState extends State<ListeningAlongPage> {
         await Wakelock.enable();
       },
       child: const Text("Dim Screen"),
+    ),
+    if (Platform.isAndroid) ElevatedButton(
+      onPressed: () async {
+        Overlay.of(context).insert(_dimScreenOverlayEntry);
+        await Wakelock.enable();
+      },
+      child: const Text("Run in Background"),
     )
   ];
 
